@@ -1,81 +1,74 @@
+
 from flask_smorest import Blueprint,abort
 from flask import request
 import uuid
+from db import db
 import random
 from flask.views import MethodView
-from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required
-from db import users
-from passlib.hash import pbkdf2_sha256
-
+from models.Usermodel import UserModel
+from schema.schema import PlainUserSchema, UserSchema
 
 blp = Blueprint("userblueprint", __name__, description="Operations on users")
 
 @blp.route("/userdata")
 class User(MethodView):
-
+    @jwt_required()
+    @blp.response(201, UserSchema(many=True))
     def get(self):
-        return users
+        return UserModel.query.all()
 
+    @jwt_required()
+    @blp.response(201, UserSchema)
     def post(self):
         data=request.get_json()
         id=str(uuid.uuid1())
         account_num=random.randint(120000,990000)
-        data["account_num"]=account_num
+        data["acc_num"]=account_num
+        data["id"]=id
+
+        new_user=UserModel(**data)
+        #return new_user
         try:
-            users[0][id]=data
-            return users 
+            db.session.add(new_user)
+            db.session.commit()
+        except Exception as e:
+            print("ERROR THROWN {}".format(e))
+            abort(500, message="An error occurred while inserting the item.")
 
-        except KeyError:
-            abort(404,message="Invalid id")
-
-    
+        return new_user
+    @jwt_required()
+    @blp.response(201, PlainUserSchema)
     def delete(self):
         data=request.get_json()
-        id=data["id"] 
-        try:
-            del users[0][id]
-            return users 
-        except KeyError:
-            abort(404,message="Invalid id")        
-
+        aadhar=data["aadhar"] 
+        del_user = UserModel.query.get_or_404(aadhar)
+        db.session.delete(del_user)
+        db.session.commit()
+        return {"message":"User DELETED"},200
+               
+    @jwt_required()
+    @blp.response(201, UserSchema)
     def put(self):
         data=request.get_json()
-        id=data["id"]
-        feature=list(data.keys())[1]
-        updated_value=data[feature]
-        try:
-            users[0][id][feature]=updated_value
-            return users
-        except KeyError:
-            return "Invalid Key",404
-        
+        aadhar=data["aadhar"]
+        user = UserModel.query.get_or_404(aadhar)
+        if user:
+            user.full_name=data["full_name"]
+            user.DOB=data["DOB"] 
+       
+        db.session.add(user)
+        db.session.commit()
 
+        return user
+        
+@jwt_required()
 @blp.route("/finduser/<int:aadhar>")
 class findUser(MethodView):
+    @blp.response(200, UserSchema)
     def get(self,aadhar):
-        for details in users[0].values():
-            if details["aadhar"]==aadhar:
-                return details
-        return "USER NOT FOUND"        
+        user = UserModel.query.get_or_404(aadhar)
+        return user        
 
 
-
-@blp.route("/login")
-class login(MethodView):
-    
-    def post(self):
-        data=request.get_json()
-        username=data['username']
-        password=data['password']
-        for user in users[0].values():
-            if user["name"]==username:
-                if pbkdf2_sha256.verify(user["password"], password):
-                    access_token=create_access_token(identity=user["acc_num"])
-                    authenticated=True
-                    return {"access_token":access_token}
-                else:
-                    return "Invalid credentials"
-        return "user doesn't exist" 
-
-        
+     
