@@ -11,20 +11,20 @@ from schema.schema import PlainUserSchema, UserSchema
 import socket
 
 blp = Blueprint("userblueprint", __name__, description="Operations on users")
-hostname = socket.gethostname()
-IPAddr = socket.gethostbyname(hostname)
-@blp.route("/userdata")
+
+my_postman_ip="223.233.68.183"
+
+@blp.route("/userdata/<string:sender_ip>")
 class User(MethodView):
     @jwt_required()
     @blp.response(201, UserSchema(many=True))
-    def get(self):
+    def get(self,sender_ip):
         jwt = get_jwt()
-        if jwt.get("client_IP")==IPAddr:
-            return UserModel.query.all()
+        if jwt.get("orig_ip")!=sender_ip:
+            abort(401, message="Admin privilege required.")
         else:
-            abort(401, message="UNAUTHORIZED CLIENT")
-
-    
+            return UserModel.query.all()
+            
 
     @jwt_required()
     @blp.response(201, UserSchema)

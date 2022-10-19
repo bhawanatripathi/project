@@ -28,11 +28,6 @@ def create_app(db_url=None):
     jwt = JWTManager(app)
     api = Api(app)
 
-    @jwt.additional_claims_loader
-    def add_claims_to_jwt(identity):
-        hostname = socket.gethostname()
-        IPAddr = socket.gethostbyname(hostname)
-        return {"client_IP":IPAddr}
     
     with app.app_context():
         db.create_all()
