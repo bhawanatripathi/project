@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from db import db
 import os
 from resources.auth import blp as AuthBlueprint
+import socket
 
 def create_app(db_url=None):
     app= Flask(__name__)
@@ -27,6 +28,12 @@ def create_app(db_url=None):
     jwt = JWTManager(app)
     api = Api(app)
 
+    @jwt.additional_claims_loader
+    def add_claims_to_jwt(identity):
+        hostname = socket.gethostname()
+        IPAddr = socket.gethostbyname(hostname)
+        return {"client_IP":IPAddr}
+    
     with app.app_context():
         db.create_all()
         

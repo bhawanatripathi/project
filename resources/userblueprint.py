@@ -5,18 +5,26 @@ import uuid
 from db import db
 import random
 from flask.views import MethodView
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt
 from models.Usermodel import UserModel
 from schema.schema import PlainUserSchema, UserSchema
+import socket
 
 blp = Blueprint("userblueprint", __name__, description="Operations on users")
-
+hostname = socket.gethostname()
+IPAddr = socket.gethostbyname(hostname)
 @blp.route("/userdata")
 class User(MethodView):
     @jwt_required()
     @blp.response(201, UserSchema(many=True))
     def get(self):
-        return UserModel.query.all()
+        jwt = get_jwt()
+        if jwt.get("client_IP")==IPAddr:
+            return UserModel.query.all()
+        else:
+            abort(401, message="UNAUTHORIZED CLIENT")
+
+    
 
     @jwt_required()
     @blp.response(201, UserSchema)
