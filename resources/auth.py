@@ -32,12 +32,11 @@ class UserRegister(MethodView):
 
         return {"message":"User created Successfully"},201
 
-@blp.route("/login/<string:client_ip>")
+@blp.route("/login")
 class UserLogin(MethodView):
     @blp.arguments(PlainAuthSchema)
-    def post(self,login_data,client_ip):
-        ip=client_ip
-        
+    def post(self,login_data):
+        ip=login_data["client_ip"]
         user = AuthModel.query.filter(AuthModel.username == login_data["username"]).first()
         if user and pbkdf2_sha256.verify(login_data["password"],user.password):
             access_token = create_access_token(identity=user.id,additional_claims={"orig_ip":ip})

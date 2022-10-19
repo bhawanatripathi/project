@@ -14,13 +14,14 @@ blp = Blueprint("userblueprint", __name__, description="Operations on users")
 
 my_postman_ip="223.233.68.183"
 
-@blp.route("/userdata/<string:abc>")
+@blp.route("/userdata")
 class User(MethodView):
     @jwt_required()
     @blp.response(201, UserSchema(many=True))
-    def get(self,abc):
+    def get(self):
+        ip=request.get_json()
         jwt = get_jwt()
-        if jwt.get("orig_ip")!=abc:
+        if jwt.get("orig_ip")!=ip["sender's_ip"]:
             abort(401, message="Admin privilege required.")
         else:
             return UserModel.query.all()

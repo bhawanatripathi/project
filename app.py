@@ -34,6 +34,5 @@ def create_app(db_url=None):
         
     api.register_blueprint(UserBlueprint)
     api.register_blueprint(AuthBlueprint)
-    
-    return app
 
+    return app
