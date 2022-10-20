@@ -1,4 +1,5 @@
 
+from urllib import response
 from flask_smorest import Blueprint,abort
 from flask import request
 import uuid
@@ -13,15 +14,16 @@ import socket
 blp = Blueprint("userblueprint", __name__, description="Operations on users")
 
 my_postman_ip="223.233.68.183"
-
+Api_key="PMAK-6350bf4168f31579d464ebdb-872772de3c32c604eaf06823df7aa4d2a5"
 @blp.route("/userdata")
 class User(MethodView):
     @jwt_required()
     @blp.response(201, UserSchema(many=True))
     def get(self):
-        ip=request.get_json()
-        jwt = get_jwt()
-        if jwt.get("orig_ip")!=ip["sender's_ip"]:
+        response=request.get_json()
+        
+        sender_api_key=response["sender_api_key"]
+        if sender_api_key!=Api_key:
             abort(401, message="Admin privilege required.")
         else:
             return UserModel.query.all()

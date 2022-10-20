@@ -36,10 +36,10 @@ class UserRegister(MethodView):
 class UserLogin(MethodView):
     @blp.arguments(PlainAuthSchema)
     def post(self,login_data):
-        ip=login_data["client_ip"]
+        #ip=login_data["client_ip"]
         user = AuthModel.query.filter(AuthModel.username == login_data["username"]).first()
         if user and pbkdf2_sha256.verify(login_data["password"],user.password):
-            access_token = create_access_token(identity=user.id,additional_claims={"orig_ip":ip})
-            return {"access_token":access_token,"orig_ip":ip},200
+            access_token = create_access_token(identity=user.id)
+            return {"access_token":access_token},200
         
         abort(401,message="Invalid Credentials, please check and try again")
