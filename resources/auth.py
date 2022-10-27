@@ -1,6 +1,7 @@
 
 from http import client
 #from msilib.schema import Error
+from flask import jsonify
 from db import db 
 from flask.views import MethodView
 from flask_smorest import Blueprint,abort
@@ -8,6 +9,12 @@ from models.AuthModel import AuthModel
 from schema.schema import PlainAuthSchema
 from flask_jwt_extended import create_access_token,get_jwt,jwt_required
 from passlib.hash import pbkdf2_sha256
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+     create_refresh_token,
+    get_jwt_identity, set_access_cookies,
+    set_refresh_cookies, unset_jwt_cookies,get_csrf_token
+)
 
 blp = Blueprint("Authentication",__name__,description="Operations on authentication")
 
@@ -39,7 +46,8 @@ class UserLogin(MethodView):
         #ip=login_data["client_ip"]
         user = AuthModel.query.filter(AuthModel.username == login_data["username"]).first()
         if user and pbkdf2_sha256.verify(login_data["password"],user.password):
-            access_token = create_access_token(identity=user.id)
-            return {"access_token":access_token},200
-        
+            access_token=create_access_token(identity=user.id)
+            resp = jsonify({'access_csrf': get_csrf_token(access_token)})
+            set_access_cookies(resp, access_token)
+            return resp, 200          
         abort(401,message="Invalid Credentials, please check and try again")

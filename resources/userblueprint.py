@@ -13,19 +13,12 @@ import socket
 
 blp = Blueprint("userblueprint", __name__, description="Operations on users")
 
-my_postman_ip="223.233.68.183"
 Api_key="PMAK-6350bf4168f31579d464ebdb-872772de3c32c604eaf06823df7aa4d2a5"
-@blp.route("/userdata/<string:sender_api_key>")
+@blp.route("/userdata")
 class User(MethodView):
     @jwt_required()
     @blp.response(201, UserSchema(many=True))
-    def get(self,sender_api_key):
-        # response=request.get_json()
-        
-        # sender_api_key=response["sender_api_key"]
-        if sender_api_key!=Api_key:
-            abort(401, message="Admin privilege required.")
-        else:
+    def get(self):
             return UserModel.query.all()
             
 
@@ -51,6 +44,8 @@ class User(MethodView):
             abort(500, message="An error occurred while inserting the item.")
 
         return new_user
+
+
     @jwt_required()
     @blp.response(201, PlainUserSchema)
     def delete(self,sender_api_key):
@@ -63,7 +58,9 @@ class User(MethodView):
         db.session.delete(del_user)
         db.session.commit()
         return {"message":"User DELETED"},200
-               
+
+
+
     @jwt_required()
     @blp.response(201, UserSchema)
     def put(self,sender_api_key):
@@ -81,6 +78,7 @@ class User(MethodView):
         db.session.commit()
 
         return user
+        
         
 @jwt_required()
 @blp.route("/finduser/<int:aadhar>")

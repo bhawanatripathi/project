@@ -1,0 +1,6 @@
+<form method="post">
+    <input type="text" asp-for="Email" placeholder="Enter your email" />
+     <input type="text" asp-for="Password" placeholder="Enter your password" /> 
+     <button class="btn btn-primary" type="submit">submit</button> 
+     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
