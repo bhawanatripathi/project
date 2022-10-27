@@ -22,11 +22,11 @@ class User(MethodView):
             return UserModel.query.all()
             
 
-    @jwt_required()
+    #@jwt_required(locations=['cookies'])
     @blp.response(201, UserSchema)
-    def post(self,sender_api_key):
-        if sender_api_key!=Api_key:
-            abort(401, message="Admin privilege required.")
+    def post(self):
+        # if sender_api_key!=Api_key:
+        #     abort(401, message="Admin privilege required.")
         
         data=request.get_json()
         id=str(uuid.uuid1())

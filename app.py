@@ -7,6 +7,8 @@ from db import db
 import os
 from resources.auth import blp as AuthBlueprint
 import socket
+from flask_wtf import CSRFProtect
+
 def create_app(db_url=None):
     app= Flask(__name__)
 
@@ -27,8 +29,10 @@ def create_app(db_url=None):
     
     db.init_app(app)    
     migrate = Migrate(app, db)
+    csrf = CSRFProtect()
+    csrf.init_app(app)
 
-    app.config["JWT_SECRET_KEY"] ="jose"
+    app.config["SECRET_KEY"] ="jose"
     jwt = JWTManager(app)
     api = Api(app)
 

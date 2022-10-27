@@ -1,7 +1,8 @@
 
 from http import client
 #from msilib.schema import Error
-from flask import jsonify
+from flask import jsonify, request, render_template
+
 from db import db 
 from flask.views import MethodView
 from flask_smorest import Blueprint,abort
@@ -13,7 +14,7 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
      create_refresh_token,
     get_jwt_identity, set_access_cookies,
-    set_refresh_cookies, unset_jwt_cookies,get_csrf_token
+    set_refresh_cookies, unset_jwt_cookies,get_csrf_token,
 )
 
 blp = Blueprint("Authentication",__name__,description="Operations on authentication")
@@ -40,6 +41,7 @@ class UserRegister(MethodView):
         return {"message":"User created Successfully"},201
 
 @blp.route("/login")
+
 class UserLogin(MethodView):
     @blp.arguments(PlainAuthSchema)
     def post(self,login_data):
@@ -49,5 +51,14 @@ class UserLogin(MethodView):
             access_token=create_access_token(identity=user.id)
             resp = jsonify({'access_csrf': get_csrf_token(access_token)})
             set_access_cookies(resp, access_token)
+            
             return resp, 200          
         abort(401,message="Invalid Credentials, please check and try again")
+
+@blp.route('/', methods=['GET'])
+class csrf(MethodView):
+    def get(self):
+            return render_template("form.html")#, csrf_token=(get_raw_jwt() or {}).get("csrf"))
+        # else:
+        #     # handle POST request
+        #     current_user = get_jwt_identity()        
