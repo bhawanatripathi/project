@@ -1,4 +1,3 @@
-
 from http import client
 #from msilib.schema import Error
 from flask import jsonify, request, render_template
@@ -41,7 +40,6 @@ class UserRegister(MethodView):
         return {"message":"User created Successfully"},201
 
 @blp.route("/login")
-
 class UserLogin(MethodView):
     @blp.arguments(PlainAuthSchema)
     def post(self,login_data):

@@ -1,11 +1,32 @@
 <html>
 <body>
     
-<form method="post">
-    <input type="text" asp-for="Email" placeholder="Enter your email" />
-     <input type="text" asp-for="Password" placeholder="Enter your password" /> 
-     <button class="btn btn-primary" type="submit">submit</button> 
+<form id="form">
+    <input id="username" type="text" name="username" placeholder="Enter your username" />
+     <input id="password" type="text" name="password" placeholder="Enter your password" /> 
+     <button id="button">submit </button>
      <input type="hidden" name="csrf_token"  value="{{ csrf_token() }}">
 </form>
+<script>
+    const username=document.getElementById("username").value;
+    const password=document.getElementById("password").value;
+    const form=document.getElementById("form");
+    const button=document.getElementById("button");
+    const token=document.querySelector("[name='csrf_token']").value
+    console.log(username)
+
+    form.addEventListener("click", function(e){
+            e.preventDefault()
+    })
+    
+    button.addEventListener("click", function(e){
+            postdata()
+    })
+    function postdata(){
+        fetch("http://127.0.0.1:5000/login",{
+            method:"POST", body: JSON.stringify({username: "bhawana", password:"password"}), headers:{"Content-Type":"application/json","X-CSRF-TOKEN":token}
+        })
+    }
+</script>
 </body>
 </html>
